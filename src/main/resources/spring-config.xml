@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:c="http://www.springframework.org/schema/c"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+		http://www.springframework.org/schema/context 
+      	http://www.springframework.org/schema/context/spring-context-4.2.xsd">
+
+<context:property-placeholder 
+location="file:/Users/raul.vallez/Documents/workspace/PrivaliaSpringProject/system.properties,
+          classpath:config.properties" 
+ignore-unresolvable="true"
+/>
+
+	<bean id="helloWorld" class="com.privalia.presentation.HelloWorld">
+		<property name="Hello" value="Hola Mundo!" />
+	</bean>
+
+	<bean id="helloWorldConst" class="com.privalia.presentation.HelloWorld">
+		<constructor-arg index="0" value="Hola Mundo From Constructor!" type="java.lang.String" />
+	</bean>
+
+	<bean id="builder" class="com.privalia.builder.Employee$EmployeeBuilder">
+		<constructor-arg value="1" />
+		<constructor-arg value="Shamik Mitra" />
+		<property name="gender" value="1" />
+		<property name="hobby" value="Blogging" />
+	</bean>
+	
+	<bean id="employee" class="com.privalia.builder.Employee"
+		factory-bean="builder"
+		factory-method="build" />
+	
+
+	<bean id="suma" class="com.privalia.calculadora.Suma" />
+
+	<bean id="resta" class="com.privalia.calculadora.Resta"/>
+		
+	<bean id="multiplicacion" class="com.privalia.calculadora.Multiplicacion"/>
+		
+	<bean id="division" class="com.privalia.calculadora.Division" />
+
+
+
+	<bean id="student" class="com.privalia.entity.Student">
+		<property name="idStudent" value="1"></property>
+		<property name="name" value="Pepe"></property>
+		<property name="surname" value="Soto"></property>
+		<property name="age" value="24"></property>
+		<property name="address">
+			<ref bean="address" />
+		</property>
+	</bean>
+	
+	<bean id="studentContructor" class="com.privalia.entity.Student">
+		<constructor-arg index="0" value="2" type="int" />
+		<constructor-arg index="1" value="Juan" type="java.lang.String" />
+		<constructor-arg index="2" value="Valentino" type="java.lang.String" />
+		<constructor-arg index="3" value="3" type="int" />
+		<constructor-arg ref="address" />	
+	</bean>
+	
+	<bean id="address" class="com.privalia.entity.Address">
+		<constructor-arg index="0" value="1" type="int" />
+		<constructor-arg index="1" value="Calle San Juan" type="java.lang.String" />
+	</bean>
+
+<!-- 	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"> -->
+<!-- 		<property name="location"> -->
+<!-- 			<value>config.properties</value> -->
+<!-- 		</property> -->
+<!-- 	</bean> -->
+
+
+	<!--  student 3 -->
+	<bean id="david3Student" class="com.privalia.entity.listas.Student">
+		<property name="idStudent" value="1"></property>
+		<property name="name" value="Pepe"></property>
+		<property name="surname" value="Soto"></property>
+		<property name="age" value="24"></property>
+		<property name="listTeacher"> <!--  tiene que coincidir con el nombre del atributo "listTeacher" -->
+			<list>
+				<bean class="com.privalia.entity.listas.Teacher">
+					<property name="idTeacher" value="1"></property>
+					<property name="name" value="Jordi"></property>
+				</bean>
+				<bean class="com.privalia.entity.listas.Teacher">
+					<property name="idTeacher" value="2"></property>
+					<property name="name" value="Pepe"></property>
+				</bean>
+			</list>
+		</property>
+	</bean>
+	
+	<bean id="database" class="com.privalia.external.configuration.Database">
+		<property name="url" value="${database.url}"></property>
+		<property name="username" value="${database.username}"></property>
+		<property name="password" value="${database.password}"></property>
+	</bean>
+
+	<bean id="compra" class="com.privalia.aspectos.Comprar" />
+	
+	<bean id="validarCompra" class="com.privalia.aspectos.ValidarMaterial" />
+	
+	<aop:config>
+		<aop:aspect ref="validarCompra">
+			<!--  los .. quiere decir cualquier parámetro -->
+			<aop:pointcut expression="execution( * com.privalia.aspectos.Comprar.compra(..) )" id="compraPoinCut" />
+		
+			<!-- Antes de comprar comprobamos la cantidad -->
+			<aop:before pointcut-ref="compraPoinCut" method="comprobarCantidad" />
+		
+			<!-- Después de comprar, empaquetamos -->
+			<aop:before pointcut-ref="compraPoinCut" method="empaquetar" />
+			
+			<!-- en caso de error -->
+			<aop:after-throwing pointcut-ref="compraPoinCut" method="ponerReclamacion" />
+		</aop:aspect>
+	</aop:config>
+
+</beans>
